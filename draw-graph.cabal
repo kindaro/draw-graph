@@ -1,0 +1,21 @@
+cabal-version: 2.4
+
+name: draw-graph
+version: 0.1.0.0
+license: ISC
+author: Ignat Insarov
+maintainer: kindaro@gmail.com
+
+common commons
+    build-depends: base ^>=4.12.0.0
+    default-language: Haskell2010
+
+library
+    import: commons
+    exposed-modules: MyLib
+    hs-source-dirs: src
+
+executable draw-graph
+    import: commons
+    build-depends: draw-graph
+    main-is: Main.hs
