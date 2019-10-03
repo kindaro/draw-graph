@@ -1,8 +1,9 @@
 module Main where
 
+import Diagrams.Prelude
+import Diagrams.Backend.SVG.CmdLine
+
 import qualified MyLib (someFunc)
 
 main :: IO ()
-main = do
-  putStrLn "Hello, Haskell!"
-  MyLib.someFunc
+main = mainWith (circle 1 :: Diagram B)

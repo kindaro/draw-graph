@@ -8,7 +8,13 @@ maintainer: kindaro@gmail.com
 
 common commons
     build-depends: base ^>=4.12.0.0
+                 , diagrams
+                 , diagrams-lib
+                 , diagrams-svg
     default-language: Haskell2010
+    default-extensions: NoMonomorphismRestriction
+                      , FlexibleContexts
+                      , TypeFamilies
 
 library
     import: commons
