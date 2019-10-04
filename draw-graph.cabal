@@ -15,6 +15,7 @@ common commons
     default-extensions: NoMonomorphismRestriction
                       , FlexibleContexts
                       , TypeFamilies
+                      , TypeApplications
 
 library
     import: commons

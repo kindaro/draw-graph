@@ -6,4 +6,4 @@ import Diagrams.Backend.SVG.CmdLine
 import qualified MyLib (someFunc)
 
 main :: IO ()
-main = mainWith (circle 1 :: Diagram B)
+main = mainWith @(Diagram B) $ square 1 ||| square 1
