@@ -11,15 +11,22 @@ common commons
                  , diagrams
                  , diagrams-lib
                  , diagrams-svg
+                 , fgl
+                 , random
+                 , split
+                 , comonad
     default-language: Haskell2010
     default-extensions: NoMonomorphismRestriction
                       , FlexibleContexts
                       , TypeFamilies
                       , TypeApplications
+                      , PatternSynonyms
+    ghc-options: -fdefer-typed-holes
 
 library
     import: commons
-    exposed-modules: MyLib
+    exposed-modules: Planar
+                   , Draw
     hs-source-dirs: src
 
 executable draw-graph
