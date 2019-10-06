@@ -13,20 +13,25 @@ common commons
                  , diagrams-svg
                  , fgl
                  , random
-                 , split
+                 , linear
                  , comonad
+                 , mtl
+                 , Stream
     default-language: Haskell2010
     default-extensions: NoMonomorphismRestriction
                       , FlexibleContexts
                       , TypeFamilies
                       , TypeApplications
                       , PatternSynonyms
-    ghc-options: -fdefer-typed-holes
+                      , ViewPatterns
+                      , ApplicativeDo
+    ghc-options: -fdefer-typed-holes -Wall
 
 library
     import: commons
     exposed-modules: Planar
                    , Draw
+                   , Layout
     hs-source-dirs: src
 
 executable draw-graph
