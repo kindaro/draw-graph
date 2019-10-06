@@ -25,6 +25,7 @@ common commons
                       , PatternSynonyms
                       , ViewPatterns
                       , ApplicativeDo
+                      , ConstraintKinds
     ghc-options: -fdefer-typed-holes -Wall
 
 library
@@ -32,6 +33,7 @@ library
     exposed-modules: Planar
                    , Draw
                    , Layout
+                   , Instances
     hs-source-dirs: src
 
 executable draw-graph
