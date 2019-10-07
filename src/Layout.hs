@@ -4,19 +4,29 @@ import Data.Bitraversable
 import Control.Monad.State
 import Linear.V2
 import Data.Graph.Inductive (DynGraph)
+import qualified Data.Graph.Inductive as Graph
 import Data.Stream (Stream)
 import qualified Data.Stream as Stream
 import System.Random
 
-randomLayout :: (DynGraph gr, Bitraversable gr) => gr a b -> gr (V2 Double, a) b
-randomLayout = bilabelWith (flip (,)) const randomPoints (Stream.repeat ())
+random :: (DynGraph gr, Bitraversable gr) => gr a b -> gr (V2 Double, a) b
+random = bilabelWith (flip (,)) const randomPoints (Stream.repeat ())
   where
     randomCoordinates = Stream.fromList $ randomRs (0, 1) $ mkStdGen 0
 
-    streamToTuples (Stream.Cons x (Stream.Cons y upstream)) = Stream.Cons (x, y) (streamToTuples upstream)
+    streamToTuples (Stream.Cons x (Stream.Cons y upstream)) =
+                                                    Stream.Cons (x, y) (streamToTuples upstream)
 
     randomPoints :: Stream (V2 Double)
     randomPoints = let f = fmap (uncurry V2) . streamToTuples in f randomCoordinates
+
+circular :: (DynGraph gr, Bitraversable gr) => gr a b -> gr (V2 Double, a) b
+circular gr =
+  let n = fromIntegral (Graph.noNodes gr)
+      coords =
+        let alpha = (pi * 2 / n)
+        in Stream.cycle [ 0.8 * V2 (sin (alpha * i) / 2) (cos (alpha * i) / 2) | i <- [1.. n] ]
+  in bilabelWith (flip (,)) const coords (Stream.repeat ()) gr
 
 label :: Traversable t => Stream index -> t a -> t (index, a)
 label = labelWith (flip (,))
@@ -26,9 +36,10 @@ labelWith f xs = flip evalState xs . traverse (labelOneWith f)
 
 bilabelWith :: Bitraversable t => (l -> indexl -> l') -> (r -> indexr -> r')
                                -> Stream indexl       -> Stream indexr       -> t l r -> t l' r'
-bilabelWith f g xs ys = let labelLeft  = labelOneWith \u (x, _) -> f u x
-                            labelRight = labelOneWith \v (_, y) -> g v y
-                        in flip evalState (Stream.zip xs ys) . bitraverse labelLeft labelRight
+bilabelWith f g xs ys =
+   let labelLeft  = labelOneWith \u (x, _) -> f u x
+       labelRight = labelOneWith \v (_, y) -> g v y
+   in flip evalState (Stream.zip xs ys) . bitraverse labelLeft labelRight
 
 labelOneWith :: (a -> index -> b) -> a -> State (Stream index) b
 labelOneWith f u = do
