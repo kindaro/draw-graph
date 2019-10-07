@@ -35,15 +35,15 @@ label = labelWith (flip (,))
 labelWith :: Traversable t => (a -> index -> b) -> Stream index -> t a -> t b
 labelWith f xs = flip evalState xs . traverse (labelOneWith f)
 
-bilabelWith :: Bitraversable t => (l -> indexl -> l') -> (r -> indexr -> r')
-                               -> Stream indexl       -> Stream indexr       -> t l r -> t l' r'
+bilabelWith
+    :: Bitraversable t
+    => (l ->  indexl -> l') -> (r ->  indexr -> r')
+    -> Stream indexl        -> Stream indexr
+    -> t l r -> t l' r'
 bilabelWith f g xs ys =
-  let labelLeft  = fmap (withStateLens fst (\(x, y) x' -> (x', y))) (labelOneWith f)
-      labelRight = fmap (withStateLens snd (\(x, y) y' -> (x, y'))) (labelOneWith g)
+  let labelLeft  = fmap (withStateLens fst (\(_, y) x' -> (x', y))) (labelOneWith f)
+      labelRight = fmap (withStateLens snd (\(x, _) y' -> (x, y'))) (labelOneWith g)
   in flip evalState (xs, ys) . bitraverse labelLeft labelRight
-
-labelOne :: a -> State (Stream index) (index, a)
-labelOne = labelOneWith (flip (,))
 
 labelOneWith :: (a -> index -> b) -> a -> State (Stream index) b
 labelOneWith f u = do

@@ -30,10 +30,12 @@ instance Bifoldable Gr where
 
 instance Bitraversable Gr where
     bitraverse _ _ Empty = pure Empty
-    bitraverse effectVertex effectEdge (Anywhere (edgesIn, identifier, label, edgesOut) r) = do
+    bitraverse effectVertex effectEdge (Anywhere (edgesIn, identifier, label, edgesOut) r) =
+      let traverseEdges = traverse (bitraverse effectEdge id . fmap pure)
+      in do
         label' <- effectVertex label
-        edgesIn' <- traverse (bitraverse effectEdge id . fmap pure) edgesIn
-        edgesOut' <- traverse (bitraverse effectEdge id . fmap pure) edgesOut
+        edgesIn'  <- traverseEdges edgesIn
+        edgesOut' <- traverseEdges edgesOut
         r' <- bitraverse effectVertex effectEdge r
         return $ insert (edgesIn', identifier, label', edgesOut') r'
 

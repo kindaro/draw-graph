@@ -17,6 +17,5 @@ draw graph = bifoldMap (nodeAt . fst) (const mempty) graph
                grade = 0.1
            in circle r
 
-
     nodeAt :: Back b => V2 Double -> Diagram b
     nodeAt v = translate v node
