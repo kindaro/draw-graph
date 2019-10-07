@@ -38,12 +38,23 @@ labelWith f xs = flip evalState xs . traverse (labelOneWith f)
 bilabelWith :: Bitraversable t => (l -> indexl -> l') -> (r -> indexr -> r')
                                -> Stream indexl       -> Stream indexr       -> t l r -> t l' r'
 bilabelWith f g xs ys =
-   let labelLeft  = labelOneWith \u (x, _) -> f u x
-       labelRight = labelOneWith \v (_, y) -> g v y
-   in flip evalState (Stream.zip xs ys) . bitraverse labelLeft labelRight
+  let labelLeft  = fmap (withStateLens fst (\(x, y) x' -> (x', y))) (labelOneWith f)
+      labelRight = fmap (withStateLens snd (\(x, y) y' -> (x, y'))) (labelOneWith g)
+  in flip evalState (xs, ys) . bitraverse labelLeft labelRight
+
+labelOne :: a -> State (Stream index) (index, a)
+labelOne = labelOneWith (flip (,))
 
 labelOneWith :: (a -> index -> b) -> a -> State (Stream index) b
 labelOneWith f u = do
     (Stream.Cons x xs) <- get
     put xs
     return (f u x)
+
+withStateLens :: (s -> t) -> (s -> t -> s) -> State t a -> State s a
+withStateLens thrust merge u = do
+    s <- get
+    let t = thrust s
+    let (r, t') = runState u t
+    put (merge s t')
+    return r
