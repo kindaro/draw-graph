@@ -12,7 +12,7 @@ import System.Random
 random :: (DynGraph gr, Bitraversable gr) => gr a b -> gr (V2 Double, a) b
 random = bilabelWith (flip (,)) const randomPoints (Stream.repeat ())
   where
-    randomCoordinates = Stream.fromList $ randomRs (0, 1) $ mkStdGen 0
+    randomCoordinates = Stream.fromList $ randomRs (-1, 1) $ mkStdGen 0
 
     streamToTuples (Stream.Cons x (Stream.Cons y upstream)) =
                                                     Stream.Cons (x, y) (streamToTuples upstream)
@@ -25,7 +25,8 @@ circular gr =
   let n = fromIntegral (Graph.noNodes gr)
       coords =
         let alpha = (pi * 2 / n)
-        in Stream.cycle [ 0.8 * V2 (sin (alpha * i) / 2) (cos (alpha * i) / 2) | i <- [1.. n] ]
+        in Stream.prefix [ 0.8 * V2 (sin (alpha * i)) (cos (alpha * i)) | i <- [1.. n] ]
+            $ error "circular: Impossible error: not enough coordinates to label all points."
   in bilabelWith (flip (,)) const coords (Stream.repeat ()) gr
 
 label :: Traversable t => Stream index -> t a -> t (index, a)
