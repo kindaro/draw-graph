@@ -42,3 +42,21 @@ instance Bitraversable Gr where
 storeGraph :: (Graph gr) => gr a b -> Node -> Store Node (Decomp gr a b)
 storeGraph graph node = let f identifier = Graph.match identifier graph
                         in store f node
+
+class Bicontainer c where
+    type IndexL c
+    type IndexR c
+    biindex :: c l r -> c (l, IndexL c) (r, IndexR c)
+
+instance Bicontainer Gr where
+    type IndexL Gr = Node
+    type IndexR Gr = (Node, Node)
+    biindex Empty = Empty
+    biindex (Anywhere (edgesIn, identifier, label, edgesOut) r) =
+      let indexEdgeIn  (r, from) = ((r, (from, identifier)), from)
+          indexEdgeOut (r, to)   = ((r, (identifier, to  )), to  )
+          label' = (label, identifier)
+          edgesIn'  = fmap indexEdgeIn  edgesIn
+          edgesOut' = fmap indexEdgeOut edgesOut
+          r' = biindex r
+      in insert (edgesIn', identifier, label', edgesOut') r'
