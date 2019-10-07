@@ -53,8 +53,8 @@ instance Bicontainer Gr where
     type IndexR Gr = (Node, Node)
     biindex Empty = Empty
     biindex (Anywhere (edgesIn, identifier, label, edgesOut) r) =
-      let indexEdgeIn  (r, from) = ((r, (from, identifier)), from)
-          indexEdgeOut (r, to)   = ((r, (identifier, to  )), to  )
+      let indexEdgeIn  (x, from) = ((x, (from, identifier)), from)
+          indexEdgeOut (x, to)   = ((x, (identifier, to  )), to  )
           label' = (label, identifier)
           edgesIn'  = fmap indexEdgeIn  edgesIn
           edgesOut' = fmap indexEdgeOut edgesOut
