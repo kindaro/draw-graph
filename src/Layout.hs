@@ -9,8 +9,8 @@ import Data.Stream (Stream)
 import qualified Data.Stream as Stream
 import System.Random
 
-random :: (DynGraph gr, Bitraversable gr) => gr a b -> gr (V2 Double, a) b
-random = bilabelWith (flip (,)) const randomPoints (Stream.repeat ())
+random :: (DynGraph gr, Bitraversable gr) => gr a b -> gr (a, V2 Double) b
+random = bilabelWith (,) const randomPoints (Stream.repeat ())
   where
     randomCoordinates = Stream.fromList $ randomRs (-1, 1) $ mkStdGen 0
 
@@ -20,14 +20,14 @@ random = bilabelWith (flip (,)) const randomPoints (Stream.repeat ())
     randomPoints :: Stream (V2 Double)
     randomPoints = let f = fmap (uncurry V2) . streamToTuples in f randomCoordinates
 
-circular :: (DynGraph gr, Bitraversable gr) => gr a b -> gr (V2 Double, a) b
+circular :: (DynGraph gr, Bitraversable gr) => gr a b -> gr (a, V2 Double) b
 circular gr =
   let n = fromIntegral (Graph.noNodes gr)
       coords =
         let alpha = (pi * 2 / n)
         in Stream.prefix [ 0.8 * V2 (sin (alpha * i)) (cos (alpha * i)) | i <- [1.. n] ]
             $ error "circular: Impossible error: not enough coordinates to label all points."
-  in bilabelWith (flip (,)) const coords (Stream.repeat ()) gr
+  in bilabelWith (,) const coords (Stream.repeat ()) gr
 
 label :: Traversable t => Stream index -> t a -> t (index, a)
 label = labelWith (flip (,))

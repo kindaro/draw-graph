@@ -1,14 +1,20 @@
 module Draw where
 
 import Diagrams.Prelude
-import Data.Graph.Inductive (Graph)
+import Data.Graph.Inductive (Graph, Node)
 import qualified Data.Graph.Inductive as Graph
 import Data.Bifoldable
+import qualified Data.List as List
+
+import Instances
 
 type Back b = (V b ~ V2, N b ~ Double, Renderable (Path V2 Double) b)
 
-draw :: (Graph gr, Back b, Bifoldable gr) => gr (V2 Double, a) e -> Diagram b
-draw graph = bifoldMap (nodeAt . fst) (const mempty) graph
+draw :: (Graph gr, Back b, Bifoldable gr, Bicontainer gr, IndexL gr ~ Int)
+     => gr (a, V2 Double) e -> Diagram b
+draw graph =
+  let vertices = bifoldMap nodeAt (const mempty) . biindex $ graph
+  in List.foldl' (\d (idFrom, idTo) -> d & connectOutside idFrom idTo) vertices (Graph.edges graph)
 
   where
     node :: Back b => Diagram b
@@ -17,5 +23,5 @@ draw graph = bifoldMap (nodeAt . fst) (const mempty) graph
                grade = 0.1
            in circle r
 
-    nodeAt :: Back b => V2 Double -> Diagram b
-    nodeAt v = translate v node
+    nodeAt :: Back b => ((a, V2 Double), Node) -> Diagram b
+    nodeAt ((_, v), identifier) = translate v (node & named identifier)
