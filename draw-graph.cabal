@@ -26,6 +26,8 @@ common commons
                       , ViewPatterns
                       , ApplicativeDo
                       , ConstraintKinds
+                      , TupleSections
+                      , BlockArguments
     ghc-options: -fdefer-typed-holes -Wall
 
 library

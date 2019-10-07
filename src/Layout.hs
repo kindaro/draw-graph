@@ -9,8 +9,7 @@ import qualified Data.Stream as Stream
 import System.Random
 
 randomLayout :: (DynGraph gr, Bitraversable gr) => gr a b -> gr (V2 Double, a) b
-randomLayout = flip evalState randomPoints
-            . bitraverse labelOne pure
+randomLayout = bilabelWith (flip (,)) const randomPoints (Stream.repeat ())
   where
     randomCoordinates = Stream.fromList $ randomRs (0, 1) $ mkStdGen 0
 
@@ -19,8 +18,20 @@ randomLayout = flip evalState randomPoints
     randomPoints :: Stream (V2 Double)
     randomPoints = let f = fmap (uncurry V2) . streamToTuples in f randomCoordinates
 
-    labelOne :: a -> State (Stream (V2 Double)) (V2 Double, a)
-    labelOne x = do
-        (Stream.Cons label labels) <- get
-        put labels
-        return (label, x)
+label :: Traversable t => Stream index -> t a -> t (index, a)
+label = labelWith (flip (,))
+
+labelWith :: Traversable t => (a -> index -> b) -> Stream index -> t a -> t b
+labelWith f xs = flip evalState xs . traverse (labelOneWith f)
+
+bilabelWith :: Bitraversable t => (l -> indexl -> l') -> (r -> indexr -> r')
+                               -> Stream indexl       -> Stream indexr       -> t l r -> t l' r'
+bilabelWith f g xs ys = let labelLeft  = labelOneWith \u (x, _) -> f u x
+                            labelRight = labelOneWith \v (_, y) -> g v y
+                        in flip evalState (Stream.zip xs ys) . bitraverse labelLeft labelRight
+
+labelOneWith :: (a -> index -> b) -> a -> State (Stream index) b
+labelOneWith f u = do
+    (Stream.Cons x xs) <- get
+    put xs
+    return (f u x)
