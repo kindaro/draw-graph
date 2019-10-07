@@ -11,6 +11,7 @@ common commons
                  , diagrams
                  , diagrams-lib
                  , diagrams-svg
+                 , diagrams-rasterific
                  , fgl
                  , random
                  , linear
