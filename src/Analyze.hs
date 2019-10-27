@@ -1,4 +1,4 @@
-module Planar where
+module Analyze where
 
 import Data.Graph.Inductive
 

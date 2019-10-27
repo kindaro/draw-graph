@@ -32,7 +32,7 @@ common commons
 
 library
     import: commons
-    exposed-modules: Planar
+    exposed-modules: Analyze
                    , Draw
                    , Layout
                    , Instances
