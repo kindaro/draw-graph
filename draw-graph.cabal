@@ -43,3 +43,15 @@ executable draw-graph
     import: commons
     build-depends: draw-graph
     main-is: Main.hs
+
+test-suite rasterific
+    import: commons
+    hs-source-dirs: test/Rasterific
+    type: exitcode-stdio-1.0
+    main-is: Main.hs
+    build-depends: draw-graph
+                 , QuickCheck
+                 , fgl-arbitrary
+                 , deepseq
+                 , tasty
+                 , tasty-quickcheck
