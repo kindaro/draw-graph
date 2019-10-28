@@ -44,3 +44,22 @@ executable draw-graph
     import: commons
     build-depends: draw-graph
     main-is: Main.hs
+
+test-suite Vcat
+    import: commons
+    hs-source-dirs: test
+    type: exitcode-stdio-1.0
+    main-is: Vcat.hs
+    build-depends: draw-graph
+test-suite Hcat
+    import: commons
+    hs-source-dirs: test
+    type: exitcode-stdio-1.0
+    main-is: Hcat.hs
+    build-depends: draw-graph
+test-suite Tile
+    import: commons
+    hs-source-dirs: test
+    type: exitcode-stdio-1.0
+    main-is: Tile.hs
+    build-depends: draw-graph
