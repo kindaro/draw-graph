@@ -63,3 +63,15 @@ test-suite Tile
     type: exitcode-stdio-1.0
     main-is: Tile.hs
     build-depends: draw-graph
+test-suite Tile2
+    import: commons
+    hs-source-dirs: test
+    type: exitcode-stdio-1.0
+    main-is: Tile2.hs
+    build-depends: draw-graph
+test-suite One
+    import: commons
+    hs-source-dirs: test
+    type: exitcode-stdio-1.0
+    main-is: One.hs
+    build-depends: draw-graph
