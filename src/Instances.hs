@@ -2,6 +2,7 @@
 
 module Instances where
 
+import Protolude
 import Data.Bifoldable
 import Data.Bitraversable
 import Data.Graph.Inductive (Graph, DynGraph, Node, Context, Decomp, Gr)
@@ -31,7 +32,7 @@ instance Bifoldable Gr where
 instance Bitraversable Gr where
     bitraverse _ _ Empty = pure Empty
     bitraverse effectVertex effectEdge (Anywhere (edgesIn, identifier, label, edgesOut) r) =
-      let traverseEdges = traverse (bitraverse effectEdge id . fmap pure)
+      let traverseEdges = traverse (bitraverse effectEdge identity . fmap pure)
       in do
         label' <- effectVertex label
         edgesIn'  <- traverseEdges edgesIn

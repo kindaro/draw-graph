@@ -1,5 +1,6 @@
 module Analyze where
 
+import Prelude
 import Data.Graph.Inductive
 import Instances
 

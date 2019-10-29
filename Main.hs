@@ -1,5 +1,6 @@
 module Main where
 
+import Protolude
 import qualified Data.List       as List
 import qualified Data.List.Split as List
 import Data.Bifunctor

@@ -1,5 +1,6 @@
 module Layout where
 
+import Protolude
 import Data.Bitraversable
 import Control.Monad.State
 import Linear.V2
@@ -26,7 +27,7 @@ circular gr =
       coords =
         let alpha = (pi * 2 / n)
         in Stream.prefix [ 0.8 * V2 (sin (alpha * i)) (cos (alpha * i)) | i <- [1.. n] ]
-            $ error "circular: Impossible error: not enough coordinates to label all points."
+            $ panic "circular: Impossible error: not enough coordinates to label all points."
   in bilabelWith (,) const coords (Stream.repeat ()) gr
 
 label :: Traversable t => Stream index -> t a -> t (index, a)

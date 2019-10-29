@@ -1,5 +1,6 @@
 module Draw where
 
+import Protolude hiding (local)
 import Diagrams.Prelude
 import Data.Graph.Inductive (Graph, Node)
 import qualified Data.Graph.Inductive as Graph
