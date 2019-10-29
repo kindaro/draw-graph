@@ -7,6 +7,7 @@ import Data.Bifunctor
 import Data.Bitraversable
 import Diagrams.Prelude
 import Diagrams.Backend.SVG.CmdLine
+import Diagrams.TwoD.Text
 
 import qualified Layout
 import Draw
@@ -20,16 +21,26 @@ main = mainWith @(Diagram B)
      $ (tile . fmap renderOne) examples
 
 renderOne :: AnyGraph -> Diagram B
-renderOne AnyGraph{..} = graph & Layout.circular
-                               & draw
-                               & decorate graph
-                               & frame
+renderOne AnyGraph{..} = graph
+                       & Layout.circular
+                       & draw
+                       & decorate
   where
-    decorate graph' x = if isAcyclic graph'
-                           then x <> (circle 0.1 & fc green & translate (r2 (0.95, 0.95)))
-                           else x
+    decorate x = (frame 0.2 . vcat . fmap (frame 0.1))
+        [ hcat blips
+        , x <> (square 2.2 & lwL 0.01)
+        , (rect 2.2 0.3 & lw none) <> (scale 0.3 . text . toS) name
+        ]
 
-    frame d = d <> (square 2.4 & lcA (black `withOpacity` 0)) <> square 2.2
+    blips =
+      [ blip (isAcyclic graph)
+      ]
+
+    blip x = square 0.2
+           & lwL 0.01 
+           & fcA if x
+                    then lime `withOpacity` 0.8
+                    else grey `withOpacity` 0.1
 
 tile :: [Diagram B] -> Diagram B
 tile xs = let columns = (ceiling . sqrt . fromIntegral . length) xs
