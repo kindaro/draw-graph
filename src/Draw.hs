@@ -14,7 +14,7 @@ draw :: (Graph gr, Back b, Bifoldable gr, Bicontainer gr, IndexL gr ~ Int)
      => gr (a, V2 Double) e -> Diagram b
 draw graph =
   let vertices = bifoldMap nodeAt (const mempty) . biindex $ graph
-  in List.foldl' (\d (idFrom, idTo) -> d & connectOutside idFrom idTo) vertices (Graph.edges graph)
+  in lwL 0.02 $ List.foldl' (\d (idFrom, idTo) -> d & arrow idFrom idTo) vertices (Graph.edges graph)
 
   where
     node :: Back b => Diagram b
@@ -25,3 +25,5 @@ draw graph =
 
     nodeAt :: Back b => ((a, V2 Double), Node) -> Diagram b
     nodeAt ((_, v), identifier) = translate v (node & named identifier)
+
+    arrow = connectOutside' (with & headLength .~ local 0.1)
