@@ -33,13 +33,12 @@ niceExamples = [ AnyGraph E.clr486, AnyGraph E.clr528, AnyGraph E.d3
 main :: IO ()
 main =
   let dia = (vcat . fmap renderOne) (take 4 niceExamples)
-      size = mkSizeSpec (r2 (Just 1000, Just 1000))
+      size = mkSizeSpec (r2 (Just 400, Nothing))
   in renderPretty "vcat.svg" size dia
 
 renderOne :: AnyGraph -> Diagram B
 renderOne (AnyGraph gr) = gr & Layout.circular
                              & draw
-                             & decorate gr
                              & frame
   where
     decorate gr' x = if isAcyclic gr'
