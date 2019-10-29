@@ -33,6 +33,7 @@ common commons
                       , ExistentialQuantification
                       , NoImplicitPrelude
                       , OverloadedStrings
+                      , RecordWildCards
     ghc-options: -fdefer-typed-holes -Wall
 
 library
@@ -41,6 +42,7 @@ library
                    , Draw
                    , Layout
                    , Instances
+                   , Examples
     hs-source-dirs: src
 
 executable draw-graph
