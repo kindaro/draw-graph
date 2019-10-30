@@ -34,7 +34,7 @@ draw graph = graph
 
   where
     node :: Back b => Diagram b
-    node = let n = fromIntegral (Graph.size graph)
+    node = let n = fromIntegral (Graph.order graph)
                r = sqrt $ (1 * grade) / (pi * n)
                grade = 0.1
            in circle r
