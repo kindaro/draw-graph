@@ -7,7 +7,6 @@ import Data.Bifunctor
 import Data.Bitraversable
 import Diagrams.Prelude
 import Diagrams.Backend.SVG.CmdLine
-import Diagrams.TwoD.Text
 
 import qualified Layout
 import Draw
@@ -20,8 +19,8 @@ main :: IO ()
 main = mainWith @(Diagram B)
      $ (tile . fmap renderOne) examples
 
-renderOne :: AnyGraph -> Diagram B
-renderOne AnyGraph{..} = graph
+renderOne :: (Text, AnyGraph) -> Diagram B
+renderOne (name, AnyGraph{..}) = graph
                        & Layout.circular
                        & draw
                        & decorate

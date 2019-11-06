@@ -8,34 +8,34 @@ import Instances
 
 data AnyGraph = forall gr a b.
               (DynGraph gr, Bicontainer gr, Bitraversable gr, Eq (gr a b), IndexL gr ~ Int)
-              => AnyGraph { graph :: gr a b, name :: Text }
+              => AnyGraph { graph :: gr a b }
 
-examples :: [AnyGraph]
+examples :: [(Text, AnyGraph)]
 examples =
-  [ AnyGraph { graph = a             , name = "a"      }
-  , AnyGraph { graph = b             , name = "b"      }
-  , AnyGraph { graph = clr486        , name = "clr486" }
-  , AnyGraph { graph = clr528        , name = "clr528" }
-  , AnyGraph { graph = d3            , name = "d3"     }
-  , AnyGraph { graph = e             , name = "e"      }
-  , AnyGraph { graph = loop          , name = "loop"   }
-  , AnyGraph { graph = vor           , name = "vor"    }
-  , AnyGraph { graph = ab            , name = "ab"     }
-  , AnyGraph { graph = c             , name = "c"      }
-  , AnyGraph { graph = clr489        , name = "clr489" }
-  , AnyGraph { graph = clr595        , name = "clr595" }
-  , AnyGraph { graph = dag3          , name = "dag3"   }
-  , AnyGraph { graph = e3            , name = "e3"     }
-  , AnyGraph { graph = gr1           , name = "gr1"    }
-  , AnyGraph { graph = cyc3          , name = "cyc3"   }
-  , AnyGraph { graph = kin248        , name = "kin248" }
-  , AnyGraph { graph = star @Gr 13   , name = "star"   }
-  , AnyGraph { graph = abb           , name = "abb"    }
-  , AnyGraph { graph = clr479        , name = "clr479" }
-  , AnyGraph { graph = clr508        , name = "clr508" }
-  , AnyGraph { graph = d1            , name = "d1"     }
-  , AnyGraph { graph = dag4          , name = "dag4"   }
-  , AnyGraph { graph = g3            , name = "g3"     }
-  , AnyGraph { graph = g3b           , name = "g3b"    }
-  , AnyGraph { graph = ucycle @Gr 13 , name = "ucycle" }
+  [ ("a"      , AnyGraph { graph = a             })
+  , ("b"      , AnyGraph { graph = b             })
+  , ("clr486" , AnyGraph { graph = clr486        })
+  , ("clr528" , AnyGraph { graph = clr528        })
+  , ("d3"     , AnyGraph { graph = d3            })
+  , ("e"      , AnyGraph { graph = e             })
+  , ("loop"   , AnyGraph { graph = loop          })
+  , ("vor"    , AnyGraph { graph = vor           })
+  , ("ab"     , AnyGraph { graph = ab            })
+  , ("c"      , AnyGraph { graph = c             })
+  , ("clr489" , AnyGraph { graph = clr489        })
+  , ("clr595" , AnyGraph { graph = clr595        })
+  , ("dag3"   , AnyGraph { graph = dag3          })
+  , ("e3"     , AnyGraph { graph = e3            })
+  , ("gr1"    , AnyGraph { graph = gr1           })
+  , ("cyc3"   , AnyGraph { graph = cyc3          })
+  , ("kin248" , AnyGraph { graph = kin248        })
+  , ("star"   , AnyGraph { graph = star @Gr 13   })
+  , ("abb"    , AnyGraph { graph = abb           })
+  , ("clr479" , AnyGraph { graph = clr479        })
+  , ("clr508" , AnyGraph { graph = clr508        })
+  , ("d1"     , AnyGraph { graph = d1            })
+  , ("dag4"   , AnyGraph { graph = dag4          })
+  , ("g3"     , AnyGraph { graph = g3            })
+  , ("g3b"    , AnyGraph { graph = g3b           })
+  , ("ucycle" , AnyGraph { graph = ucycle @Gr 13 })
   ]
