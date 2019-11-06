@@ -43,6 +43,7 @@ library
                    , Layout
                    , Instances
                    , Examples
+                   , Converge
     hs-source-dirs: src
 
 executable draw-graph
