@@ -3,13 +3,15 @@ module Draw where
 import Protolude hiding (local)
 import Diagrams.Prelude
 import Diagrams.TwoD.Arrowheads
-import Data.Graph.Inductive (Graph, Node)
+import Data.Graph.Inductive (DynGraph, Node, gmap)
 import qualified Data.Graph.Inductive as Graph
 import Data.Bifunctor
 import Data.Bifoldable
 import qualified Data.List as List
+import Diagrams.TwoD.Text
 
 import Instances
+import Analyze
 
 classify :: Eq a => [a] -> [[a]]
 classify = classifyBy (==)
@@ -21,26 +23,31 @@ classifyBy eq = List.foldl' f [ ]
     f (xs@ (x: _): xss) y | x `eq` y  = (y: xs): xss
                           | otherwise = xs: f xss y
 
-type Back b = (V b ~ V2, N b ~ Double, Renderable (Path V2 Double) b)
+type Back b = (V b ~ V2, N b ~ Double, Renderable (Path V2 Double) b
+                , Renderable (Diagrams.TwoD.Text.Text Double) b)
 
-draw :: (Graph gr, Back b, Bifoldable gr, Bicontainer gr, IndexL gr ~ Int)
+draw :: forall a b gr e. (DynGraph gr, Back b, Bifoldable gr, Bicontainer gr, IndexL gr ~ Int)
      => gr (a, V2 Double) e -> Diagram b
 draw graph = graph
            & biindex
+           & gmap (\ x@(edgesIn, identifier, ((_, v), identifier'), edgesOut) -> (edgesIn, identifier, ((isLeaf x, v), identifier'), edgesOut))
            & bifoldMap nodeAt (const mempty)
            & drawMore addArrow arrows
            & drawMore addLine lines
            & lwL 0.02
 
   where
-    node :: Back b => Diagram b
-    node = let n = fromIntegral (Graph.order graph)
-               r = sqrt $ (1 * grade) / (pi * n)
-               grade = 0.1
-           in circle r
+    node :: Back b => Bool -> Node -> Diagram b
+    node x identifier =
+      let n = fromIntegral (Graph.order graph)
+          r = sqrt $ (1 * grade) / (pi * n)
+          grade = 0.1
+      in scale r
+            $ ( fc white . scale 2 . text . show) identifier
+            <> (circle 1 & (if x then fc red else fc black) & lw none)
 
-    nodeAt :: Back b => ((a, V2 Double), Node) -> Diagram b
-    nodeAt ((_, v), identifier) = translate v (node & named identifier)
+    nodeAt :: Back b => ((Bool, V2 Double), Node) -> Diagram b
+    nodeAt ((x, v), identifier) = translate v (node x identifier & named identifier)
 
     addArrow, addLine :: Back b => Diagram b -> (Node, Node) -> Diagram b
     addArrow d (idFrom, idTo) = d & connectOutside' (with & headLength .~ local 0.1) idFrom idTo
