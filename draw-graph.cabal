@@ -34,6 +34,8 @@ common commons
                       , NoImplicitPrelude
                       , OverloadedStrings
                       , RecordWildCards
+                      , PartialTypeSignatures
+                      , ScopedTypeVariables
     ghc-options: -fdefer-typed-holes -Wall
 
 library
