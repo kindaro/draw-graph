@@ -5,12 +5,18 @@ module Instances where
 import Protolude
 import Data.Bifoldable
 import Data.Bitraversable
-import Data.Graph.Inductive (Graph, DynGraph, Node, Context, Decomp, Gr)
+import Data.Graph.Inductive (Graph, DynGraph, Node, Context, Decomp, GDecomp, Gr)
 import qualified Data.Graph.Inductive as Graph
 import Control.Comonad.Store
 
 insert :: DynGraph gr => Context a b -> gr a b -> gr a b
 insert = (Graph.&)
+
+getNodeFromContext :: Context vertex edge -> Node
+getNodeFromContext (_, x, _, _) = x
+
+mapContext :: (a -> b) -> Context a edge -> Context b edge
+mapContext f (edgesIn, identifier, label, edgesOut) = (edgesIn, identifier, f label, edgesOut)
 
 pattern Anywhere :: DynGraph gr => Graph.Context a b -> gr a b -> gr a b
 pattern Anywhere context remainingGraph <- (Graph.matchAny -> (context, remainingGraph))
@@ -61,3 +67,60 @@ instance Bicontainer Gr where
           edgesOut' = fmap indexEdgeOut edgesOut
           r' = biindex r
       in insert (edgesIn', identifier, label', edgesOut') r'
+
+data PointedGraph gr edge vertex = PointedGraph
+  { context :: Context vertex edge
+  , remainder :: gr vertex edge
+  }
+  -- Isomorphic to `GDecomp` — witnessed by `compose` and `decompose`.
+
+instance DynGraph gr => Functor (PointedGraph gr edge) where
+  fmap f PointedGraph {..} = PointedGraph { context =mapContext f context, remainder = Graph.nmap f remainder }
+
+chooseArbitraryFocus :: DynGraph gr => gr vertex edge -> Maybe (PointedGraph gr edge vertex)
+chooseArbitraryFocus Empty = Nothing
+chooseArbitraryFocus (Anywhere context remainder) = Just PointedGraph {..}
+
+compose :: DynGraph gr => GDecomp gr vertex edge -> PointedGraph gr edge vertex
+compose (context, remainder) = PointedGraph {..}
+
+decompose :: Graph gr => PointedGraph gr edge vertex -> GDecomp gr vertex edge
+decompose PointedGraph {..} = (context, remainder)
+
+refocus :: DynGraph gr => PointedGraph gr edge vertex -> Node -> PointedGraph gr edge vertex
+refocus x@PointedGraph {..} n = case Graph.match n remainder of
+  (Nothing, _) -> x
+  (Just _, _) -> case Graph.match n (insert context remainder) of
+    (Nothing, _) -> panic "Unreachable. If a node is in a subgraph, it is also in the larger graph."
+    (Just context', remainder') -> compose (context', remainder')
+
+-- foldOverDecomp :: DynGraph gr
+--   => (GDecomp gr vertex edge -> accumulator -> accumulator)
+--   -> accumulator -> gr vertex edge -> accumulator
+-- foldOverDecomp _ x Empty = x
+-- foldOverDecomp f x (Anywhere context remainder) = f (context, remainder) (foldOverDecomp f x remainder)
+
+instance DynGraph gr => Comonad (PointedGraph gr edge) where
+  extract PointedGraph {context = (_, _, label, _), ..} = label
+
+  extend f x = case extend' x f (uncurry insert (decompose x)) of
+    Empty -> panic "Unreachable. There is at least one node in the source and nodes are never dropped."
+    Anywhere context' remainder' -> refocus (compose (context', remainder')) (getNodeFromContext (context x))
+
+    where
+    extend' whole f Empty = Empty
+    extend' whole f (Anywhere context remainder) =
+      let
+        newLabel = f (refocus whole (getNodeFromContext context))
+        newContext = mapContext (const newLabel) context
+      in Anywhere newContext (extend' whole f remainder)
+
+-- fairMap :: forall gr vertex edge. DynGraph gr => (GDecomp gr vertex edge -> vertex') -> gr vertex edge -> gr vertex' edge
+-- fairMap f = foldOverDecomp (insert . g) Empty
+--   where
+--     g :: GDecomp gr vertex edge -> Context vertex edge
+--     g x@(context, remainder) = mapContext (const (f x)) context
+
+fairMap :: forall gr a b edge. DynGraph gr => (GDecomp gr a edge -> b) -> gr a edge -> gr b edge
+fairMap f Empty = Empty
+fairMap f (Anywhere context remainder) = uncurry insert . decompose . extend (f . decompose) $ PointedGraph {..}
