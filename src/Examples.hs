@@ -6,9 +6,12 @@ import Data.Graph.Inductive.Example
 import Data.Bitraversable
 import Instances
 
-data AnyGraph = forall gr a b.
-              (DynGraph gr, Bicontainer gr, Bitraversable gr, Eq (gr a b), IndexL gr ~ Int)
-              => AnyGraph { graph :: gr a b }
+data AnyGraph = forall graph vertex edge.
+  ( DynGraph graph, Bicontainer graph, Bitraversable graph
+  , Eq vertex, Ord edge
+  , forall vertex edge. (Eq vertex, Ord edge) => Eq (graph vertex edge)
+  , IndexL graph ~ Int )
+  => AnyGraph { graph :: graph vertex edge }
 
 examples :: [(Text, AnyGraph)]
 examples =

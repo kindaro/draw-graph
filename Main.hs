@@ -7,6 +7,7 @@ import Data.Bifunctor
 import Data.Bitraversable
 import Diagrams.Prelude
 import Diagrams.Backend.SVG.CmdLine
+import Data.Graph.Inductive (DynGraph, Gr, Node)
 
 import qualified Layout
 import Draw
@@ -22,15 +23,22 @@ main = mainWith @(Diagram B)
 renderAutumn :: (Text, AnyGraph) -> Diagram B
 renderAutumn (name, AnyGraph{..})
   = graph
+  & Layout.circular
   & autumn
-  & fmap (\ x -> renderOne (name, AnyGraph x))
+  & fmap (\ x -> decorateLaidOutGraph (name, x))
   & hcat
 
-renderOne :: (Text, AnyGraph) -> Diagram B
+renderOne :: _ => (Text, AnyGraph) -> Diagram B
 renderOne (name, AnyGraph{..}) = graph
                        & Layout.circular
-                       & draw
-                       & decorate
+                       & \ graph' -> decorateLaidOutGraph (name, graph')
+
+decorateLaidOutGraph :: ( DynGraph graph, Bicontainer graph, Bitraversable graph
+                        , Eq (graph (vertex, V2 Double) edge), IndexL graph ~ Int )
+                     => (Text, graph (vertex, V2 Double) edge) -> Diagram B
+decorateLaidOutGraph (name, graph) = graph
+                                             & draw
+                                             & decorate
   where
     decorate x = (frame 0.2 . vcat . fmap (frame 0.1))
         [ hcat blips

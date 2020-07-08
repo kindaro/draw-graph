@@ -36,6 +36,7 @@ common commons
                       , RecordWildCards
                       , PartialTypeSignatures
                       , ScopedTypeVariables
+                      , QuantifiedConstraints
     ghc-options: -fdefer-typed-holes -Wall
 
 library
