@@ -53,7 +53,6 @@ draw graph = graph
         unsafeHead = headDef (panic "`classifyBy` returns a list of non-empty lists.")
 
     swapEquality (x, y) (x', y')
-        | x == x' && y == y' = True
         | x == y' && y == x' = True
         | otherwise = False
 
