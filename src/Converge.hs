@@ -1,6 +1,7 @@
 module Converge where
 
 import Prelude
+import qualified Data.List as List
 
 converge :: Eq a => [a] -> [a]
 converge = convergeBy (==)
@@ -20,3 +21,13 @@ fixpBy eq f = last . convergeBy eq . iterate f
 
 diag :: a -> (a, a)
 diag x = (x, x)
+
+classify :: Eq a => [a] -> [[a]]
+classify = classifyBy (==)
+
+classifyBy :: (a -> a -> Bool) -> [a] -> [[a]]
+classifyBy eq = List.foldl' f [ ]
+  where
+    f [ ] y = [[y]]
+    f (xs@ (x: _): xss) y | x `eq` y  = (y: xs): xss
+                          | otherwise = xs: f xss y

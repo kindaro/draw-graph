@@ -12,16 +12,7 @@ import Diagrams.TwoD.Text
 
 import Instances
 import Analyze
-
-classify :: Eq a => [a] -> [[a]]
-classify = classifyBy (==)
-
-classifyBy :: (a -> a -> Bool) -> [a] -> [[a]]
-classifyBy eq = List.foldl' f [ ]
-  where
-    f [ ] y = [[y]]
-    f (xs@ (x: _): xss) y | x `eq` y  = (y: xs): xss
-                          | otherwise = xs: f xss y
+import Converge
 
 type Back b = (V b ~ V2, N b ~ Double, Renderable (Path V2 Double) b
                 , Renderable (Diagrams.TwoD.Text.Text Double) b)
