@@ -54,10 +54,13 @@ class Bicontainer c where
     type IndexL c
     type IndexR c
     biindex :: c l r -> c (l, IndexL c) (r, IndexR c)
+    lindex :: c l r -> c (l, IndexL c) r
+    rindex :: c l r -> c l (r, IndexR c)
 
 instance Bicontainer Gr where
     type IndexL Gr = Node
     type IndexR Gr = (Node, Node)
+
     biindex Empty = Empty
     biindex (Anywhere (edgesIn, identifier, label, edgesOut) r) =
       let indexEdgeIn  (x, from) = ((x, (from, identifier)), from)
@@ -67,6 +70,9 @@ instance Bicontainer Gr where
           edgesOut' = fmap indexEdgeOut edgesOut
           r' = biindex r
       in insert (edgesIn', identifier, label', edgesOut') r'
+
+    lindex = bimap identity fst . biindex
+    rindex = bimap fst identity . biindex
 
 data PointedGraph gr edge vertex = PointedGraph
   { context :: Context vertex edge
