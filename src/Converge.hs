@@ -17,3 +17,6 @@ convergeBy eq (x: xs@(y: _))
 
 fixpBy :: (a -> a -> Bool) -> (a -> a) -> a -> a
 fixpBy eq f = last . convergeBy eq . iterate f
+
+diag :: a -> (a, a)
+diag x = (x, x)
