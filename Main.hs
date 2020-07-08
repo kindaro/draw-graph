@@ -17,7 +17,14 @@ import Examples
 
 main :: IO ()
 main = mainWith @(Diagram B)
-     $ (tile . fmap renderOne) examples
+     $ vcat . fmap renderAutumn $ examples
+
+renderAutumn :: (Text, AnyGraph) -> Diagram B
+renderAutumn (name, AnyGraph{..})
+  = graph
+  & autumn
+  & fmap (\ x -> renderOne (name, AnyGraph x))
+  & hcat
 
 renderOne :: (Text, AnyGraph) -> Diagram B
 renderOne (name, AnyGraph{..}) = graph
