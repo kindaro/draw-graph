@@ -30,7 +30,7 @@ draw :: forall a b gr e. (DynGraph gr, Back b, Bifoldable gr, Bicontainer gr, In
      => gr (a, V2 Double) e -> Diagram b
 draw graph = graph
            & biindex
-           & gmap (\ x@(edgesIn, identifier, ((_, v), identifier'), edgesOut) -> (edgesIn, identifier, ((isLeaf x, v), identifier'), edgesOut))
+           & fairMap ((\ x@(edgesIn, identifier, ((_, v), identifier'), edgesOut) -> ((isLeaf x, v), identifier')) . fst)
            & bifoldMap nodeAt (const mempty)
            & drawMore addArrow arrows
            & drawMore addLine lines

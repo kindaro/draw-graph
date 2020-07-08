@@ -21,13 +21,9 @@ autumn = converge . iterate shedLeaves
 
 shedLeaves :: DynGraph gr => gr a b -> gr a b
 shedLeaves gr =
-  let notLeaves = (fmap fst . filter (snd . snd) . Graph.labNodes . gmap (mark isLeaf)) gr
+  let notLeaves = (fmap fst . filter (not . snd . snd) . Graph.labNodes . fairMap (fmap isLeaf . diag . fst)) gr
   in Graph.subgraph notLeaves gr
 
 isLeaf :: Context a b -> Bool
 isLeaf (_, _, _, [ ]) = True
 isLeaf (_, _, _, _  ) = False
-
-mark :: (Context a b -> Bool) -> Context a b -> Context (a, Bool) b
-mark p x@(edgesIn, identifier, label       , edgesOut)
-       = (edgesIn, identifier, (label, p x), edgesOut)
