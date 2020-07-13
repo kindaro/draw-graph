@@ -83,6 +83,15 @@ instance Bicontainer Gr where
 newtype Blip f a b = Blip { blop :: f a b }
 newtype Flip f a b = Flip { flop :: f b a }
 
+instance Bifunctor f => Bifunctor (Blip f) where
+  bimap f g = Blip . bimap f g . blop
+
+instance Bifunctor f => Bifunctor (Flip f) where
+  bimap f g = Flip . bimap g f . flop
+
+instance {-# overlappable #-} Bifunctor f => Functor (f a) where
+  fmap = bimap identity
+
 instance Bifoldable f => Bifoldable (Blip f) where
   bifoldr f g z = bifoldr f g z . blop
 
@@ -91,6 +100,15 @@ instance Bifoldable f => Bifoldable (Flip f) where
 
 instance Bifoldable c => Foldable (c a) where
   foldr f z = bifoldr (const identity) f z
+
+instance Bitraversable f => Bitraversable (Blip f) where
+  bitraverse f g = fmap Blip . bitraverse f g . blop
+
+instance Bitraversable f => Bitraversable (Flip f) where
+  bitraverse f g = fmap Flip . bitraverse g f . flop
+
+instance Bitraversable c => Traversable (c a) where
+  traverse f z = bitraverse pure f z
 
 instance Bicontainer c => Container (Blip c a) where
   type Index (Blip c a) = IndexR c
