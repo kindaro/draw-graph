@@ -50,6 +50,10 @@ storeGraph :: (Graph gr) => gr a b -> Node -> Store Node (Decomp gr a b)
 storeGraph graph node = let f identifier = Graph.match identifier graph
                         in store f node
 
+class Container c where
+  type Index c
+  index :: c i -> c (i, Index c)
+
 class Bicontainer c where
     type IndexL c
     type IndexR c
@@ -73,6 +77,18 @@ instance Bicontainer Gr where
 
     lindex = bimap identity fst . biindex
     rindex = bimap fst identity . biindex
+
+newtype Flip f a b = Flip { flop :: f b a }
+
+newtype Blip f a b = Blip { blop :: f a b }
+
+instance Bicontainer c => Container (Blip c a) where
+  type Index (Blip c a) = IndexR c
+  index = Blip . rindex . blop
+
+instance Bicontainer c => Container (Flip c a) where
+  type Index (Flip c a) = IndexL c
+  index = Flip . lindex . flop
 
 data PointedGraph gr edge vertex = PointedGraph
   { context :: Context vertex edge

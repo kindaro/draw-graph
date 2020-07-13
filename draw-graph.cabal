@@ -21,6 +21,7 @@ common commons
                  , protolude
     default-language: Haskell2010
     default-extensions: NoMonomorphismRestriction
+                      , FlexibleInstances
                       , FlexibleContexts
                       , TypeFamilies
                       , TypeApplications
