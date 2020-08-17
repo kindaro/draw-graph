@@ -78,9 +78,19 @@ instance Bicontainer Gr where
     lindex = bimap identity fst . biindex
     rindex = bimap fst identity . biindex
 
+-- These wrappers select which type variable should be the last. This way I can
+-- write instances for both _f a_ and _Λa. f a b_.
+newtype Blip f a b = Blip { blop :: f a b }
 newtype Flip f a b = Flip { flop :: f b a }
 
-newtype Blip f a b = Blip { blop :: f a b }
+instance Bifoldable f => Bifoldable (Blip f) where
+  bifoldr f g z = bifoldr f g z . blop
+
+instance Bifoldable f => Bifoldable (Flip f) where
+  bifoldr f g z = bifoldr g f z . flop
+
+instance Bifoldable c => Foldable (c a) where
+  foldr f z = bifoldr (const identity) f z
 
 instance Bicontainer c => Container (Blip c a) where
   type Index (Blip c a) = IndexR c
