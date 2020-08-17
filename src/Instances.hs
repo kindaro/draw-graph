@@ -146,3 +146,6 @@ instance DynGraph gr => Comonad (PointedGraph gr edge) where
 fairMap :: forall gr a b edge. DynGraph gr => (GDecomp gr a edge -> b) -> gr a edge -> gr b edge
 fairMap f Empty = Empty
 fairMap f (Anywhere context remainder) = uncurry insert . decompose . extend (f . decompose) $ PointedGraph {..}
+
+labelByIndex :: (Functor c, Container c, Traversable c) => (Index c -> label) -> c x -> c (label, x)
+labelByIndex f = fmap (swap . fmap f) . index
