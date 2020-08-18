@@ -98,7 +98,7 @@ instance Bifoldable f => Bifoldable (Blip f) where
 instance Bifoldable f => Bifoldable (Flip f) where
   bifoldr f g z = bifoldr g f z . flop
 
-instance Bifoldable c => Foldable (c a) where
+instance {-# overlappable #-} Bifoldable c => Foldable (c a) where
   foldr f z = bifoldr (const identity) f z
 
 instance Bitraversable f => Bitraversable (Blip f) where
@@ -107,7 +107,7 @@ instance Bitraversable f => Bitraversable (Blip f) where
 instance Bitraversable f => Bitraversable (Flip f) where
   bitraverse f g = fmap Flip . bitraverse g f . flop
 
-instance Bitraversable c => Traversable (c a) where
+instance {-# overlappable #-} Bitraversable c => Traversable (c a) where
   traverse f z = bitraverse pure f z
 
 instance Bicontainer c => Container (Blip c a) where
@@ -118,7 +118,7 @@ instance Bicontainer c => Container (Flip c a) where
   type Index (Flip c a) = IndexL c
   index = Flip . lindex . flop
 
-instance (Bicontainer c, Index (c a) ~ IndexR c) => Container (c a) where
+instance {-# overlappable #-} (Bicontainer c, Index (c a) ~ IndexR c) => Container (c a) where
   index = rindex
 
 data PointedGraph gr edge vertex = PointedGraph
