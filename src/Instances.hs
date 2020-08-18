@@ -118,6 +118,9 @@ instance Bicontainer c => Container (Flip c a) where
   type Index (Flip c a) = IndexL c
   index = Flip . lindex . flop
 
+instance (Bicontainer c, Index (c a) ~ IndexR c) => Container (c a) where
+  index = rindex
+
 data PointedGraph gr edge vertex = PointedGraph
   { context :: Context vertex edge
   , remainder :: gr vertex edge
