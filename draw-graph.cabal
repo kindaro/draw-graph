@@ -44,6 +44,7 @@ library
     import: commons
     exposed-modules: Analyze
                    , Draw
+                   , Draw.Examples
                    , Layout
                    , Instances
                    , Examples
