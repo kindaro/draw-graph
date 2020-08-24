@@ -29,9 +29,11 @@ verifyExample x@(name, _) = goldenVsStringDiff
 compareImages ∷ FilePath → FilePath → [String]
 compareImages expected actual = ["sh", "-c", commandLine]
   where
-    commandLine = ("cmp '"…"' '"…"' || \
-                                 \compare '"…"' '"…"' png:- | montage -geometry +4+4 '"…"' - '"…"' png:- | display -title '"…"' -")
-      actual expected actual expected actual expected expected
+    commandLine = ("if ! cmp '"…"' '"…"'; then \
+                   \compare '"…"' '"…"' png:- | \
+                   \montage -geometry +4+4 '"…"' - '"…"' png:- > '"…".diff.png'; \
+                   \echo 'See "…".diff.png for difference.'; false; fi")
+      actual expected actual expected actual expected expected expected
 
 renderToPngBytes ∷ Diagram Rasterific → LazyBytes.ByteString
 renderToPngBytes = encodePng . renderDia Rasterific (RasterificOptions (mkWidth 250))
