@@ -2,6 +2,8 @@ module Converge where
 
 import Prelude
 import qualified Data.List as List
+import Data.Function
+import Data.Ord
 
 converge :: Eq a => [a] -> [a]
 converge = convergeBy (==)
@@ -31,3 +33,6 @@ classifyBy eq = List.foldl' f [ ]
     f [ ] y = [[y]]
     f (xs@ (x: _): xss) y | x `eq` y  = (y: xs): xss
                           | otherwise = xs: f xss y
+
+classifyOn ∷ Ord π ⇒ (a → π) → [a] → [[a]]
+classifyOn f = (map . map) snd . List.groupBy ((==) `on` fst) . List.sortBy (comparing fst) . map (\x -> let y = f x in y `seq` (y, x))
