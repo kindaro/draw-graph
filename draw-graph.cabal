@@ -19,6 +19,11 @@ common commons
                  , Stream
                  , split
                  , protolude
+                 , text
+                 , bytestring
+                 , JuicyPixels
+                 , cute-interpolation
+                 , diagrams-rasterific
     default-language: Haskell2010
     default-extensions: NoMonomorphismRestriction
                       , FlexibleInstances
@@ -38,6 +43,7 @@ common commons
                       , PartialTypeSignatures
                       , ScopedTypeVariables
                       , QuantifiedConstraints
+                      , UnicodeSyntax
     ghc-options: -fdefer-typed-holes -Wall
 
 library
@@ -54,4 +60,13 @@ library
 executable draw-graph
     import: commons
     build-depends: draw-graph
+    main-is: Main.hs
+
+test-suite pictures
+    import: commons
+    type: exitcode-stdio-1.0
+    build-depends: draw-graph
+                 , tasty
+                 , tasty-golden
+    hs-source-dirs: checks/pictures
     main-is: Main.hs

@@ -1,2 +1,2 @@
-packages: . /srv/src/fgl/fgl-arbitrary
+packages: . /srv/src/fgl/fgl-arbitrary ~/code/haskell/cute-interpolation
 with-compiler: ghc-8.6

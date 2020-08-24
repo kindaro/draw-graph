@@ -13,14 +13,14 @@ import Analyze
 import Instances
 import Examples
 
-renderOne :: _ => (Text, AnyGraph) -> Diagram B
+renderOne :: (Back b, _) => (Text, AnyGraph) -> Diagram b
 renderOne (name, AnyGraph{..}) = graph
                        & Layout.circular
                        & \ graph' -> decorateLaidOutGraph (name, graph')
 
 decorateLaidOutGraph :: ( DynGraph graph, Bicontainer graph, Bitraversable graph
-                        , Eq (graph (vertex, V2 Double) edge), IndexL graph ~ Int )
-                     => (Text, graph (vertex, V2 Double) edge) -> Diagram B
+                        , Eq (graph (vertex, V2 Double) edge), IndexL graph ~ Int, Back b )
+                     => (Text, graph (vertex, V2 Double) edge) -> Diagram b
 decorateLaidOutGraph (name, graph) = graph
                                              & draw
                                              & decorate
