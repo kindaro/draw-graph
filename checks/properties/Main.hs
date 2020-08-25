@@ -37,4 +37,5 @@ main = defaultMain $ testGroup "Properties."
   [ testProperty "Edges can be contracted and expanded" $ (expandEdges @Gr @Int @Int) `inverts` compactifyEdges
   , testProperty "Edges can be expanded and contracted" $ (G_ . NME . compactifyEdges) `inverts` (expandEdges . unG)
   , testProperty "Unordered pair pattern is correct" $ u2ToV2 . uncurry (U2 @Int) <=> u2ToV2 . uncurry (flip U2)
+  , testProperty "Loops can be removed and put back" \ x → (insEdges @Gr @Char @Char) (expandLoops $ loops x) (dropLoops x) === x
   ]

@@ -133,6 +133,9 @@ dropLoops = filterEdges (\(V2 n m, _) →n ≠ m)
 loops ∷ _ ⇒ graph nodeLabel edgeLabel → Map Node (MultiSet edgeLabel)
 loops = Map.fromListWith MultiSet.union . fmap (bimap (\(V2 x _) → x) MultiSet.singleton) . filter (\(V2 x y, _) → x ≡ y) . labEdges'
 
+expandLoops :: Map Node (MultiSet edgeLabel) → [(Node, Node, edgeLabel)]
+expandLoops u = concat $ fmap (\ i → fmap (i, i, ) (MultiSet.toList $ u Map.! i)) (Map.keys u)
+
 tidyEdge ∷ (Node, Node, edgeLabel) → (V2 Node, edgeLabel)
 tidyEdge (x, y, z) = (V2 x y, z)
 
