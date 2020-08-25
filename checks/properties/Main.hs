@@ -19,12 +19,12 @@ instance (Arbitrary a, Ord a) => Arbitrary (MultiSet a) where
   shrink = fmap MultiSet.fromList . shrink . MultiSet.toList
 
 -- | Surely an expandable graph.
-newtype G = G_ {unG_ ∷ NoMultipleEdges Gr (Char, MultiSet Char) (MultiSet Char, MultiSet Char)} deriving (Eq, Show)
+newtype G = G_ {unG_ ∷ NoMultipleEdges Gr (CompactNode Char Char) (CompactEdge Char)} deriving (Eq, Show)
 
-unG :: G → Gr (Char, MultiSet Char) (MultiSet Char, MultiSet Char)
+unG :: G → CompactGraph Gr Char Char
 unG = nmeGraph . unG_
 
-pattern G ∷ Gr (Char, MultiSet Char) (MultiSet Char, MultiSet Char) → G
+pattern G ∷ CompactGraph Gr Char Char → G
 pattern G x ← G_ (NME x)
   where G = G_ . NME . filterEdges (\ ((V2 n m), (xs, ys)) → n < m ∧ not (null xs) ∧ not (null ys))
 

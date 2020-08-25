@@ -84,37 +84,41 @@ v2ToU2 (V2 x y) = U2 x y
 u2ToV2 ∷ Ord a ⇒ U2 a → V2 a
 u2ToV2 (U2 x y) = V2 x y
 
+type CompactNode nodeLabel edgeLabel = (nodeLabel, MultiSet edgeLabel)
+type CompactEdge edgeLabel = (MultiSet edgeLabel, MultiSet edgeLabel)
+type CompactGraph graph nodeLabel edgeLabel = graph (CompactNode nodeLabel edgeLabel) (CompactEdge edgeLabel)
+
 -- | The idea here is that there is at most one edge between any two nodes of a
 -- compactified graph, going in the ascending direction, and that it has the summa
 -- of edge labels previously going there and back as its label.
-compactifyEdges ∷ _ ⇒ graph nodeLabel edgeLabel → graph (nodeLabel, MultiSet edgeLabel) (MultiSet edgeLabel, MultiSet edgeLabel)
+compactifyEdges ∷ _ ⇒ graph nodeLabel edgeLabel → CompactGraph graph nodeLabel edgeLabel
 compactifyEdges graph =
   let edges = fmap (unTidyEdge . first u2ToV2) . Map.toList . edgeBundles $ graph
       nodes = fmap (associateLoopLabelsWithNode graph) . Graph.labNodes $ graph
   in Graph.mkGraph nodes edges
   where
-    associateLoopLabelsWithNode ∷ _ ⇒ graph nodeLabel edgeLabel → (Node, nodeLabel) → (Node, (nodeLabel, MultiSet edgeLabel))
+    associateLoopLabelsWithNode ∷ _ ⇒ graph nodeLabel edgeLabel → (Node, nodeLabel) → (Node, CompactNode nodeLabel edgeLabel)
     associateLoopLabelsWithNode graph (n, z) = (n, (z, fromMaybe MultiSet.empty (Map.lookup n (loops graph))))
 
 -- | This one inverts `compactifyEdges`.`
-expandEdges ∷ _ ⇒ graph (nodeLabel, MultiSet edgeLabel) (MultiSet edgeLabel, MultiSet edgeLabel) → graph nodeLabel edgeLabel
+expandEdges ∷ _ ⇒ CompactGraph graph nodeLabel edgeLabel → graph nodeLabel edgeLabel
 expandEdges graph =
   let loops = concat . fmap expandLoops . Graph.labNodes $ graph
       edges = concat . fmap expandEdges . Graph.labEdges $ graph
       nodes = fmap (fmap fst) . Graph.labNodes $ graph
   in Graph.mkGraph nodes (loops ++ edges)
   where
-    expandLoops ∷ (Node, (nodeLabel, MultiSet edgeLabel)) → [(Node, Node, edgeLabel)]
+    expandLoops ∷ (Node, CompactNode nodeLabel edgeLabel) → [(Node, Node, edgeLabel)]
     expandLoops (n, (z, labels)) = fmap (n, n, ) . MultiSet.toList $ labels
 
-    expandEdges ∷ (Node, Node, (MultiSet edgeLabel, MultiSet edgeLabel)) → [(Node, Node, edgeLabel)]
+    expandEdges ∷ (Node, Node, CompactEdge edgeLabel) → [(Node, Node, edgeLabel)]
     expandEdges (x, y, (us, vs)) = fmap (x, y, ) (MultiSet.toList us) ++ fmap (y, x, ) (MultiSet.toList vs)
 
-edgeBundles :: _ ⇒ graph nodeLabel edgeLabel → Map (U2 Node) (MultiSet edgeLabel, MultiSet edgeLabel)
+edgeBundles :: _ ⇒ graph nodeLabel edgeLabel → Map (U2 Node) (CompactEdge edgeLabel)
 edgeBundles = Map.fromListWith mappend . fmap (bimap (v2ToU2 . fst) discriminate . diag) .  labEdges' . dropLoops
   where
     -- | Sort edges that go in ascending node number direction to the left and descending to the right; drop loops altogether.
-    discriminate ∷ (V2 Node, edgeLabel) → (MultiSet edgeLabel, MultiSet edgeLabel)
+    discriminate ∷ (V2 Node, edgeLabel) → CompactEdge edgeLabel
     discriminate (V2 x y, z)
       | x < y = (MultiSet.singleton z, MultiSet.empty)
       | x > y = (MultiSet.empty, MultiSet.singleton z)
