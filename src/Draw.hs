@@ -127,14 +127,20 @@ edgeBundles = Map.fromListWith mappend . fmap (bimap (v2ToU2 . fst) discriminate
 labEdges' ∷ _ ⇒ graph nodeLabel edgeLabel → [(V2 Node, edgeLabel)]
 labEdges' = fmap tidyEdge . Graph.labEdges
 
+insEdges' ∷ DynGraph graph ⇒ [(V2 Node, edgeLabel)] → graph nodeLabel edgeLabel → graph nodeLabel edgeLabel
+insEdges' edges graph = Graph.insEdges (fmap unTidyEdge edges) graph
+
 dropLoops ∷ _ ⇒ graph nodeLabel edgeLabel → graph nodeLabel edgeLabel
 dropLoops = filterEdges (\(V2 n m, _) →n ≠ m)
 
 loops ∷ _ ⇒ graph nodeLabel edgeLabel → Map Node (MultiSet edgeLabel)
 loops = Map.fromListWith MultiSet.union . fmap (bimap (\(V2 x _) → x) MultiSet.singleton) . filter (\(V2 x y, _) → x ≡ y) . labEdges'
 
-expandLoops :: Map Node (MultiSet edgeLabel) → [(Node, Node, edgeLabel)]
-expandLoops u = concat $ fmap (\ i → fmap (i, i, ) (MultiSet.toList $ u Map.! i)) (Map.keys u)
+expandLoops :: Map Node (MultiSet edgeLabel) → [(V2 Node, edgeLabel)]
+expandLoops = fmap (first (uncurry V2 . diag)) . expandMultiMap
+
+expandMultiMap ∷ Ord key ⇒ Map key (MultiSet value) → [(key, value)]
+expandMultiMap u = Map.keys u >>= \ key → fmap (key, ) (MultiSet.toList (u Map.! key))
 
 tidyEdge ∷ (Node, Node, edgeLabel) → (V2 Node, edgeLabel)
 tidyEdge (x, y, z) = (V2 x y, z)
