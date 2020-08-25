@@ -84,6 +84,9 @@ v2ToU2 (V2 x y) = U2 x y
 u2ToV2 ∷ Ord a ⇒ U2 a → V2 a
 u2ToV2 (U2 x y) = V2 x y
 
+swapV2 ∷ V2 a → V2 a
+swapV2 (V2 x y) = V2 y x
+
 type CompactNode nodeLabel edgeLabel = (nodeLabel, MultiSet edgeLabel)
 type CompactEdge edgeLabel = (MultiSet edgeLabel, MultiSet edgeLabel)
 type CompactGraph graph nodeLabel edgeLabel = graph (CompactNode nodeLabel edgeLabel) (CompactEdge edgeLabel)
@@ -103,16 +106,11 @@ compactifyEdges graph =
 -- | This one inverts `compactifyEdges`.`
 expandEdges ∷ _ ⇒ CompactGraph graph nodeLabel edgeLabel → graph nodeLabel edgeLabel
 expandEdges graph =
-  let loops = concat . fmap expandLoops . Graph.labNodes $ graph
-      edges = concat . fmap expandEdges . labEdges' $ graph
-      nodes = fmap (fmap fst) . Graph.labNodes $ graph
-  in Graph.mkGraph nodes (loops ++ edges)
-  where
-    expandLoops ∷ (Node, CompactNode nodeLabel edgeLabel) → [(Node, Node, edgeLabel)]
-    expandLoops (n, (z, labels)) = fmap (n, n, ) . MultiSet.toList $ labels
-
-    expandEdges ∷ (V2 Node, CompactEdge edgeLabel) → [(Node, Node, edgeLabel)]
-    expandEdges (V2 x y, (us, vs)) = fmap (x, y, ) (MultiSet.toList us) ++ fmap (y, x, ) (MultiSet.toList vs)
+  let
+    loops = concatMap (uncurry (fmap . (,)) . bimap (uncurry V2 . diag) (MultiSet.toList . snd)) . Graph.labNodes $ graph
+    edges = concatMap (uncurry (\n (there, back) → fmap (n,) (MultiSet.toList there) ++ fmap (swapV2 n, ) (MultiSet.toList back))) . labEdges' $ graph
+    nodes = fmap (fmap fst) . Graph.labNodes $ graph
+  in mkGraph' nodes (loops ++ edges)
 
 edgeBundles :: _ ⇒ graph nodeLabel edgeLabel → Map (U2 Node) (CompactEdge edgeLabel)
 edgeBundles = Map.fromListWith mappend . fmap (bimap (v2ToU2 . fst) discriminate . diag) .  labEdges' . dropLoops
@@ -129,6 +127,9 @@ labEdges' = fmap tidyEdge . Graph.labEdges
 
 insEdges' ∷ DynGraph graph ⇒ [(V2 Node, edgeLabel)] → graph nodeLabel edgeLabel → graph nodeLabel edgeLabel
 insEdges' edges graph = Graph.insEdges (fmap unTidyEdge edges) graph
+
+mkGraph' ∷ DynGraph graph ⇒ [(Node, nodeLabel)] → [(V2 Node, edgeLabel)] → graph nodeLabel edgeLabel
+mkGraph' nodes edges = insEdges' edges (Graph.mkGraph nodes [ ])
 
 dropLoops ∷ _ ⇒ graph nodeLabel edgeLabel → graph nodeLabel edgeLabel
 dropLoops = filterEdges (\(V2 n m, _) →n ≠ m)
