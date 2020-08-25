@@ -10,5 +10,5 @@ import Draw
 
 main ∷ IO ( )
 main = defaultMain $ testGroup "Properties."
-  [ testProperty "Edges can be contracted and expanded" $ (expandEdges @Gr @( ) @( )) `inverts` compactifyEdges
+  [ testProperty "Edges can be contracted and expanded" $ (expandEdges @Gr @Int @Int) `inverts` compactifyEdges
   ]
