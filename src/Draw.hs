@@ -104,15 +104,15 @@ compactifyEdges graph =
 expandEdges ∷ _ ⇒ CompactGraph graph nodeLabel edgeLabel → graph nodeLabel edgeLabel
 expandEdges graph =
   let loops = concat . fmap expandLoops . Graph.labNodes $ graph
-      edges = concat . fmap expandEdges . Graph.labEdges $ graph
+      edges = concat . fmap expandEdges . labEdges' $ graph
       nodes = fmap (fmap fst) . Graph.labNodes $ graph
   in Graph.mkGraph nodes (loops ++ edges)
   where
     expandLoops ∷ (Node, CompactNode nodeLabel edgeLabel) → [(Node, Node, edgeLabel)]
     expandLoops (n, (z, labels)) = fmap (n, n, ) . MultiSet.toList $ labels
 
-    expandEdges ∷ (Node, Node, CompactEdge edgeLabel) → [(Node, Node, edgeLabel)]
-    expandEdges (x, y, (us, vs)) = fmap (x, y, ) (MultiSet.toList us) ++ fmap (y, x, ) (MultiSet.toList vs)
+    expandEdges ∷ (V2 Node, CompactEdge edgeLabel) → [(Node, Node, edgeLabel)]
+    expandEdges (V2 x y, (us, vs)) = fmap (x, y, ) (MultiSet.toList us) ++ fmap (y, x, ) (MultiSet.toList vs)
 
 edgeBundles :: _ ⇒ graph nodeLabel edgeLabel → Map (U2 Node) (CompactEdge edgeLabel)
 edgeBundles = Map.fromListWith mappend . fmap (bimap (v2ToU2 . fst) discriminate . diag) .  labEdges' . dropLoops
@@ -128,10 +128,10 @@ labEdges' ∷ _ ⇒ graph nodeLabel edgeLabel → [(V2 Node, edgeLabel)]
 labEdges' = fmap tidyEdge . Graph.labEdges
 
 dropLoops ∷ _ ⇒ graph nodeLabel edgeLabel → graph nodeLabel edgeLabel
-dropLoops = uncurry Graph.mkGraph . bimap Graph.labNodes (filter (\(x, y, z) → x ≠ y) . Graph.labEdges) . diag
+dropLoops = filterEdges (\(V2 n m, _) →n ≠ m)
 
 loops ∷ _ ⇒ graph nodeLabel edgeLabel → Map Node (MultiSet edgeLabel)
-loops = Map.fromListWith MultiSet.union . fmap (bimap (\(V2 x y) → x) MultiSet.singleton) . filter (\(V2 x y, z) → x ≡ y) . labEdges'
+loops = Map.fromListWith MultiSet.union . fmap (bimap (\(V2 x _) → x) MultiSet.singleton) . filter (\(V2 x y, _) → x ≡ y) . labEdges'
 
 tidyEdge ∷ (Node, Node, edgeLabel) → (V2 Node, edgeLabel)
 tidyEdge (x, y, z) = (V2 x y, z)
