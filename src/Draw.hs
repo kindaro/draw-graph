@@ -110,13 +110,13 @@ expandEdges graph =
 
 edgeBundles :: _ ⇒ graph nodeLabel edgeLabel → Map (U2 Node) ([edgeLabel], [edgeLabel])
 edgeBundles = Map.fromListWith mappend . fmap (bimap (v2ToU2 . fst) discriminate . diag) .  labEdges' . dropLoops
-
--- | Sort edges that go in ascending node number direction to the left and descending to the right; drop loops altogether.
-discriminate ∷ (V2 Node, edgeLabel) → ([edgeLabel], [edgeLabel])
-discriminate (V2 x y, z)
-  | x < y = ([z], [ ])
-  | x > y = ([ ], [z])
-  | x ≡ y = ([ ], [ ])
+  where
+    -- | Sort edges that go in ascending node number direction to the left and descending to the right; drop loops altogether.
+    discriminate ∷ (V2 Node, edgeLabel) → ([edgeLabel], [edgeLabel])
+    discriminate (V2 x y, z)
+      | x < y = ([z], [ ])
+      | x > y = ([ ], [z])
+      | x ≡ y = ([ ], [ ])
 
 labEdges' ∷ _ ⇒ graph nodeLabel edgeLabel → [(V2 Node, edgeLabel)]
 labEdges' = fmap tidyEdge . Graph.labEdges
