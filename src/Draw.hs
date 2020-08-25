@@ -109,7 +109,7 @@ expandEdges graph =
     expandEdges (x, y, (us, vs)) = fmap (x, y, ) us ++ fmap (y, x, ) vs
 
 edgeBundles :: _ ⇒ graph nodeLabel edgeLabel → Map (U2 Node) ([edgeLabel], [edgeLabel])
-edgeBundles = Map.fromListWith biappend . fmap (bimap (v2ToU2 . fst) discriminate . diag) .  labEdges' . dropLoops
+edgeBundles = Map.fromListWith mappend . fmap (bimap (v2ToU2 . fst) discriminate . diag) .  labEdges' . dropLoops
 
 -- | Sort edges that go in ascending node number direction to the left and descending to the right; drop loops altogether.
 discriminate ∷ (V2 Node, edgeLabel) → ([edgeLabel], [edgeLabel])
@@ -132,8 +132,5 @@ tidyEdge (x, y, z) = (V2 x y, z)
 
 unTidyEdge ∷ (V2 Node, edgeLabel) → (Node, Node, edgeLabel)
 unTidyEdge (V2 x y, z) = (x, y, z)
-
-biappend ∷ ([a], [b]) → ([a], [b]) → ([a], [b])
-biappend (xs, ys) (xs', ys') = (xs <> xs', ys <> ys')
 
 unsafeHead = headDef (panic "`classifyBy` returns a list of non-empty lists.")
