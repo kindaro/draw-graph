@@ -7,7 +7,7 @@ author: Ignat Insarov
 maintainer: kindaro@gmail.com
 
 common commons
-    build-depends: base ^>=4.12.0.0
+    build-depends: base
                  , diagrams
                  , diagrams-lib
                  , diagrams-svg

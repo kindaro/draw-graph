@@ -1,2 +1,6 @@
-packages: . /srv/src/fgl/fgl-arbitrary ~/code/haskell/cute-interpolation
+packages: .
 with-compiler: ghc-8.6
+source-repository-package
+    type: git
+    location: https://github.com/kindaro/cute-interpolation.git
+    tag: master
