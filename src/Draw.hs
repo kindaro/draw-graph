@@ -22,32 +22,28 @@ import Converge
 type Back b = (V b ~ V2, N b ~ Double, Renderable (Path V2 Double) b
                 , Renderable (Diagrams.TwoD.Text.Text Double) b)
 
+
 draw :: forall a b gr e. (DynGraph gr, Back b, Bifoldable gr, Bicontainer gr, IndexL gr ~ Int)
      => gr (a, V2 Double) e -> Diagram b
-draw graph = graph
+draw = draw' defaultNodeStyle defaultArrowStyle 0.02
+
+draw' :: forall a b gr e. (DynGraph gr, Back b, Bifoldable gr, Bicontainer gr, IndexL gr ~ Int)
+     => (Bool -> Double -> Node -> Diagram b) -> ArrowOpts Double → Double -> gr (a, V2 Double) e -> Diagram b
+draw' node arrow thickness graph = graph
            & biindex
            & fairMap ((\ x@(edgesIn, identifier, ((_, v), identifier'), edgesOut) -> ((isLeaf x, v), identifier')) . fst)
            & bifoldMap nodeAt (const mempty)
            & drawMore addArrow arrows
            & drawMore addLine lines
-           & lwL 0.02
+           & lwL thickness
 
   where
-    node :: Back b => Bool -> Node -> Diagram b
-    node x identifier =
-      let n = fromIntegral (Graph.order graph)
-          r = sqrt $ (1 * grade) / (pi * n)
-          grade = 0.1
-      in scale r
-            $ ( fc white . scale 2 . text . show) identifier
-            <> (circle 1 & (if x then fc red else fc black) & lw none)
-
     nodeAt :: Back b => ((Bool, V2 Double), Node) -> Diagram b
-    nodeAt ((x, v), identifier) = translate v (node x identifier & named identifier)
+    nodeAt ((x, v), identifier) = translate v (node x (fromIntegral (Graph.order graph)) identifier & named identifier)
 
     addArrow, addLine :: Back b => Diagram b -> (Node, Node) -> Diagram b
-    addArrow d (idFrom, idTo) = d & connectOutside' (with & headLength .~ local 0.1) idFrom idTo
-    addLine  d (idFrom, idTo) = d & connectOutside' (with & arrowHead .~ noHead)     idFrom idTo
+    addArrow d (idFrom, idTo) = d & connectOutside' arrow idFrom idTo
+    addLine  d (idFrom, idTo) = d & connectOutside' (arrow & arrowHead .~ noHead) idFrom idTo
 
     arrows, lines :: [(Node, Node)]
     (arrows, lines) = Graph.edges graph
@@ -64,6 +60,17 @@ draw graph = graph
 -- I need to do something else. I should draw everything with a single
 -- bifold. But for that I first need to conflate edges and add labels that tell
 -- me which edges go both ways.
+
+defaultNodeStyle :: Back b => Bool -> Double -> Node -> Diagram b
+defaultNodeStyle x nodeScale identifier =
+  let r = sqrt $ (1 * grade) / (pi * nodeScale)
+      grade = 0.1
+  in scale r
+        $ ( fc white . scale 2 . text . show) identifier
+        <> (circle 1 & (if x then fc red else fc black) & lw none)
+
+defaultArrowStyle ∷ ArrowOpts Double
+defaultArrowStyle = with & headLength .~ local 0.1
 
 data EdgeType = Arrow | Line deriving (Eq, Ord, Show)
 
